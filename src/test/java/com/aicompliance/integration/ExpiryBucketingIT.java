@@ -10,6 +10,7 @@ import com.aicompliance.application.employee.EmployeeService;
 import com.aicompliance.application.expiry.ExpiryBucketingService;
 import com.aicompliance.application.port.CertificateRepository;
 import com.aicompliance.application.port.EmployeeCertificationRepository;
+import com.aicompliance.application.port.FileStorageService;
 import com.aicompliance.application.port.UserRepository;
 import com.aicompliance.domain.certificate.CertificateCategory;
 import com.aicompliance.domain.company.Company;
@@ -30,6 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -74,6 +76,12 @@ class ExpiryBucketingIT {
 
     @Autowired
     private UserRepository userRepository;
+
+    // Real S3/MinIO isn't available on CI runners, and this test only exercises expiry
+    // bucketing, not file persistence - a mock stands in so certificateService.upload(...)
+    // and employeeComplianceService.uploadCertification(...) don't need real storage.
+    @MockitoBean
+    private FileStorageService fileStorageService;
 
     @AfterEach
     void clearContext() {
