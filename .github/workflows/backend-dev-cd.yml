@@ -70,10 +70,8 @@ jobs:
   deploy:
     needs: build-image
     runs-on: ubuntu-latest
-    # Reuses the same "production" environment's secrets (SSH_HOST/SSH_USERNAME/
-    # SSH_PRIVATE_KEY) since dev and prod run on the same server - only the compose
-    # project name, port mapping, and .env file differ.
-    environment: production
+    # Uses repo-level secrets (SSH_HOST/SSH_USERNAME/SSH_PRIVATE_KEY) - same server as
+    # production, only the compose project name, port mapping, and .env file differ.
     steps:
       # Deploys into ~/complaince-dev/backend using the aicompliance-dev compose project
       # name, which keeps it fully separate from the production stack in ~/app/backend

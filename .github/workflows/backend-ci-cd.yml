@@ -83,7 +83,6 @@ jobs:
   deploy:
     needs: build-image
     runs-on: ubuntu-latest
-    environment: production
     steps:
       # The server only pulls the already-built image and restarts the container -
       # no compilation happens there, so this step needs SSH + docker, nothing else.
