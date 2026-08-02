@@ -36,18 +36,26 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required - generate 32+ random bytes}
       FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required, e.g. http://31.97.205.56:8080}
-      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required - use a real provider, not MailHog}
+      # Defaulted (not :?required) for dev - email-dependent features (password
+      # reset, signup approval emails) will silently no-op until a real SMTP_HOST
+      # is set, per AuthService/SignupRequestService's documented email-failure
+      # handling (logs a warning, doesn't fail the request).
+      SMTP_HOST: ${SMTP_HOST:-smtp.invalid}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_AUTH: "true"
       SMTP_STARTTLS: "true"
-      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:?STORAGE_ENDPOINT is required}
+      # Defaulted (not :?required) for dev - certificate/document upload and
+      # download will fail against this placeholder endpoint until real S3 (or
+      # MinIO) credentials are set. Everything else in the app works fine without
+      # it; this just unblocks starting the stack without storage configured yet.
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-http://storage.invalid}
       STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
-      STORAGE_BUCKET: ${STORAGE_BUCKET:?STORAGE_BUCKET is required}
-      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?STORAGE_ACCESS_KEY is required}
-      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?STORAGE_SECRET_KEY is required}
-      STORAGE_PATH_STYLE: ${STORAGE_PATH_STYLE:-false}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-aicompliance-dev-unconfigured}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-unconfigured}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-unconfigured}
+      STORAGE_PATH_STYLE: ${STORAGE_PATH_STYLE:-true}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
