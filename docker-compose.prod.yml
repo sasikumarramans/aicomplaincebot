@@ -19,6 +19,11 @@ services:
     #   - "5432:5432"
 
   backend:
+    # BACKEND_IMAGE lets CI deploy a specific already-built-and-pushed GHCR tag
+    # (see .github/workflows/backend-ci-cd.yml) without rebuilding on the server.
+    # Left unset, this defaults to a local tag and `build:` below is used instead -
+    # e.g. for building directly on a dev/staging box with `docker compose up -d --build`.
+    image: ${BACKEND_IMAGE:-aicompliance-backend:local}
     build:
       context: ..
       dockerfile: demo/Dockerfile
