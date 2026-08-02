@@ -1,0 +1,75 @@
+# Staging/dev deployment - runs alongside docker-compose.prod.yml on the same server
+# without colliding (separate volumes, separate host ports, no Caddy). Deploy with:
+#   docker compose -f docker-compose.dev.yml --env-file .env.dev -p aicompliance-dev up -d --build
+# The -p flag namespaces containers/volumes/network so this never touches the prod stack.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - aicompliance-dev-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    # BACKEND_IMAGE lets CI deploy a specific already-built-and-pushed GHCR tag
+    # without rebuilding on the server. Left unset, `build:` below is used instead.
+    image: ${BACKEND_IMAGE:-aicompliance-backend:dev-local}
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required - generate 32+ random bytes}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required, e.g. http://31.97.205.56:8080}
+      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required - use a real provider, not MailHog}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_AUTH: "true"
+      SMTP_STARTTLS: "true"
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:?STORAGE_ENDPOINT is required}
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:?STORAGE_BUCKET is required}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?STORAGE_ACCESS_KEY is required}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?STORAGE_SECRET_KEY is required}
+      STORAGE_PATH_STYLE: ${STORAGE_PATH_STYLE:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    ports:
+      # Exposed directly (no Caddy in front for dev) - defaults to 8081, override via .env.dev.
+      - "${BACKEND_HOST_PORT:-8081}:8080"
+
+  frontend:
+    build:
+      context: ../aicompliance-frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Defaults to 8080 - browse http://<server-ip>:8080 for this environment.
+      - "${FRONTEND_HOST_PORT:-8080}:80"
+
+volumes:
+  aicompliance-dev-postgres-data:
