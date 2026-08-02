@@ -44,6 +44,15 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    # Mail server reachability isn't essential to the app being "up" - AuthService/
+    # SignupRequestService already degrade gracefully (log + continue) when SMTP is
+    # unreachable, per their documented design. Without this, an unconfigured/
+    # unreachable SMTP_HOST (e.g. the dev environment's placeholder) drags the
+    # aggregate /actuator/health status to DOWN and fails container healthchecks,
+    # even though the application itself started and is working fine.
+    mail:
+      enabled: false
 
 springdoc:
   swagger-ui:
