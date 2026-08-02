@@ -24,9 +24,12 @@ services:
     # Left unset, this defaults to a local tag and `build:` below is used instead -
     # e.g. for building directly on a dev/staging box with `docker compose up -d --build`.
     image: ${BACKEND_IMAGE:-aicompliance-backend:local}
+    # context is this backend repo's own root - the Dockerfile only ever COPYs files
+    # from inside it, so this works regardless of what the checkout folder is named
+    # locally (demo/) vs on a server (backend/), unlike a sibling-relative context.
     build:
-      context: ..
-      dockerfile: demo/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       postgres:

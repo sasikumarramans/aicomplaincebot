@@ -70,8 +70,8 @@ jobs:
     # project name, port mapping, and .env file differ.
     environment: production
     steps:
-      # Deploys into ~/app-dev/demo using the aicompliance-dev compose project name,
-      # which keeps it fully separate from the production stack in ~/app/demo
+      # Deploys into ~/complaince-dev/backend using the aicompliance-dev compose project
+      # name, which keeps it fully separate from the production stack in ~/app/backend
       # (different containers, network, and volumes - see docker-compose.dev.yml).
       - name: Deploy to dev server
         uses: appleboy/ssh-action@v1.2.0
@@ -81,7 +81,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ~/app-dev/demo
+            cd ~/complaince-dev/backend
             export BACKEND_IMAGE=ghcr.io/${{ github.repository }}:dev-${{ github.sha }}
             docker pull "$BACKEND_IMAGE"
             docker compose -f docker-compose.dev.yml --env-file .env.dev -p aicompliance-dev up -d --no-build backend

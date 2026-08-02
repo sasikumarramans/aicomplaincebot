@@ -93,7 +93,7 @@ jobs:
           # login step here using a GHCR_PAT secret with read:packages scope.
           script: |
             set -e
-            cd ~/app/demo
+            cd ~/app/backend
             export BACKEND_IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
             docker pull "$BACKEND_IMAGE"
             docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --no-build backend
