@@ -57,6 +57,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The default `docker` buildx driver can't export cache (type=gha cache-to below) -
+      # only the docker-container driver can, hence this step before the build.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
