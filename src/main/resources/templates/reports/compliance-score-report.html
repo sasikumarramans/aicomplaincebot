@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Compliance Score Report</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        .meta { color: #666; margin-bottom: 16px; }
+        .overall { font-size: 24px; font-weight: bold; margin: 16px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Compliance Score Report</h1>
+    <div class="meta">
+        <span th:text="${companyName}">Company</span> &#183;
+        Generated <span th:text="${generatedAt}">date</span>
+    </div>
+    <div class="overall">Overall: <span th:text="${overallPercent}">0</span>%</div>
+    <table>
+        <thead><tr><th>Category Group</th><th>Score</th><th>Valid / Total</th></tr></thead>
+        <tbody>
+        <tr th:each="row : ${byCategoryGroup}">
+            <td th:text="${row.categoryGroup}">Group</td>
+            <td th:text="${row.scorePercent} + '%'">0%</td>
+            <td th:text="${row.validCount} + ' / ' + ${row.totalCount}">0 / 0</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${explanation != null}" th:text="${explanation}">Explanation</p>
+</body>
+</html>

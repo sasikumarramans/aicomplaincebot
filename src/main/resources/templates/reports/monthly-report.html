@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Monthly Report</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        .meta { color: #666; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Monthly Compliance Report</h1>
+    <div class="meta">
+        <span th:text="${companyName}">Company</span> &#183;
+        Generated <span th:text="${generatedAt}">date</span>
+    </div>
+    <table>
+        <thead><tr><th>Month</th><th>Certificates Expiring</th></tr></thead>
+        <tbody>
+        <tr th:each="row : ${expiryTrend}">
+            <td th:text="${row.label}">Month</td>
+            <td th:text="${row.value}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+</html>

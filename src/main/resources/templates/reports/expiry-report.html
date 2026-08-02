@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Expiry Report</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        .meta { color: #666; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .bucket-EXPIRED, .bucket-DAYS_0, .bucket-DAYS_3 { color: #b00020; font-weight: bold; }
+        .bucket-DAYS_7, .bucket-DAYS_15, .bucket-DAYS_30 { color: #b26a00; }
+    </style>
+</head>
+<body>
+    <h1>Expiry Report</h1>
+    <div class="meta">
+        <span th:text="${companyName}">Company</span> &#183;
+        Generated <span th:text="${generatedAt}">date</span>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Certificate</th>
+            <th>Category</th>
+            <th>Expiry Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cert : ${certificates}">
+            <td th:text="${cert.certificateName}">Name</td>
+            <td th:text="${cert.categoryName}">Category</td>
+            <td th:text="${cert.expiryDate}">Date</td>
+            <td th:class="'bucket-' + ${cert.expiryBucket}" th:text="${cert.expiryBucket}">Bucket</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(certificates)}">No certificates found.</p>
+</body>
+</html>

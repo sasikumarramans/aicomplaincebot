@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Audit Report</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        h2 { font-size: 14px; margin-top: 20px; }
+        .meta { color: #666; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .summary-box { background: #f7f7f7; padding: 10px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Audit Report</h1>
+    <div class="meta">
+        <span th:text="${companyName}">Company</span> &#183;
+        Generated <span th:text="${generatedAt}">date</span>
+    </div>
+
+    <div class="summary-box">
+        <div>Total Certificates: <span th:text="${totalCertificates}">0</span></div>
+        <div>Pending Approvals: <span th:text="${pendingApprovals}">0</span></div>
+        <div>Expired: <span th:text="${expiredCount}">0</span></div>
+        <div>Missing Documents: <span th:text="${missingDocumentCount}">0</span></div>
+        <div>Compliance Score: <span th:text="${complianceScore}">0</span>%</div>
+    </div>
+
+    <h2>AI Summary</h2>
+    <p th:text="${aiSummary}">Summary text.</p>
+
+    <h2>Missing Documents</h2>
+    <table>
+        <thead><tr><th>Plant</th><th>Missing Category</th></tr></thead>
+        <tbody>
+        <tr th:each="row : ${missingDocuments}">
+            <td th:text="${row.plantName}">Plant</td>
+            <td th:text="${row.categoryName}">Category</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(missingDocuments)}">No missing documents.</p>
+</body>
+</html>

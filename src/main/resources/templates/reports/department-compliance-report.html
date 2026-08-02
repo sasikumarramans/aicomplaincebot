@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Department Compliance Report</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        .meta { color: #666; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Plant-wise Compliance Report</h1>
+    <div class="meta">
+        <span th:text="${companyName}">Company</span> &#183;
+        Generated <span th:text="${generatedAt}">date</span>
+    </div>
+    <p style="color:#666">Grouped by Plant - certificates don't carry a department field
+        (only Plant/Category), so this is the closest real grouping available.</p>
+    <table>
+        <thead>
+        <tr>
+            <th>Plant</th>
+            <th>Certificate Count</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${plantCounts}">
+            <td th:text="${row.label}">Plant</td>
+            <td th:text="${row.value}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+</html>

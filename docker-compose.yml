@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aicompliance-postgres
+    environment:
+      POSTGRES_DB: aicompliance
+      POSTGRES_USER: aicompliance
+      POSTGRES_PASSWORD: aicompliance
+    ports:
+      - "5434:5432"
+    volumes:
+      - aicompliance-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aicompliance"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: aicompliance-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: aicompliance
+      MINIO_ROOT_PASSWORD: aicompliance123
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    volumes:
+      - aicompliance-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: aicompliance-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 aicompliance aicompliance123 &&
+      mc mb -p local/aicompliance-certificates &&
+      exit 0
+      "
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aicompliance-mailhog
+    ports:
+      - "1026:1025"
+      - "8026:8025"
+
+volumes:
+  aicompliance-postgres-data:
+  aicompliance-minio-data:

@@ -1,0 +1,111 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.aicompliance'
+version = '0.0.1-SNAPSHOT'
+description = 'AI Compliance Copilot backend'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    mapstructVersion = '1.6.3'
+}
+
+dependencies {
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.aspectj:aspectjweaver'
+
+    // Security / JWT
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // Persistence
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-flyway'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
+    // Mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Scheduling/async support comes from spring-boot-starter (already transitively included)
+
+    // File storage - AWS S3 SDK v2 (also used against MinIO in dev via endpoint override)
+    implementation platform('software.amazon.awssdk:bom:2.46.7')
+    implementation 'software.amazon.awssdk:s3'
+
+    // OCR text extraction. Pinned to PDFBox 2.x (not the newer 3.x line) because
+    // openhtmltopdf-pdfbox:1.0.10 (below) hard-requires PDFBox 2.x - its jar manifest
+    // declares Import-Package org.apache.pdfbox.pdmodel.font;version="[2.0,3)" and calls
+    // PDFBox 2.x's static PDType1Font font constants, which were removed in PDFBox 3.x.
+    // Both libraries share this classpath, so PDFBox itself must stay on 2.x; mixing in
+    // pdfbox:3.x here breaks PDF report generation at runtime with
+    // NoSuchFieldError: COURIER_BOLD_OBLIQUE. Only one file (PdfBoxTextExtractor) uses
+    // PDFBox directly, and PDFTextStripper/PDFRenderer/PDDocument.load are unchanged
+    // between 2.x and 3.x other than the 3.x-only org.apache.pdfbox.Loader helper class.
+    implementation 'org.apache.pdfbox:pdfbox:2.0.31'
+    implementation 'net.sourceforge.tess4j:tess4j:5.16.0'
+
+    // DOCX parsing
+    implementation 'org.apache.poi:poi-ooxml:5.5.1'
+
+    // AI provider client - WebClient only, app stays servlet/MVC otherwise
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // PDF report generation (LGPL-friendly, avoids iText AGPL/commercial licensing)
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Thymeleaf's standard dialect needs OGNL for th:each/th:text expressions, but it's not
+    // pulled in transitively by spring-boot-starter-thymeleaf in this Boot version - without it,
+    // template processing fails at runtime with NoClassDefFoundError: ognl/ClassResolver.
+    // Must match thymeleaf-parent's managed ognl.version (3.3.4 for Thymeleaf 3.1.5) - a newer
+    // OGNL (3.4.x) changed the OgnlContext constructor signature and fails with NoSuchMethodError.
+    implementation 'ognl:ognl:3.3.4'
+
+    // Mapping / boilerplate reduction
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // API docs
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+
+    // Config
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Testcontainers
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.21.3')
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
