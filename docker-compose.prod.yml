@@ -65,6 +65,10 @@ services:
     # TLS in front of the frontend container for external traffic.
 
   frontend:
+    # FRONTEND_IMAGE lets CI deploy a specific already-built-and-pushed GHCR tag
+    # (see aicompliance-frontend's own .github/workflows/frontend-ci-cd.yml) without
+    # rebuilding on the server. Left unset, `build:` below is used instead.
+    image: ${FRONTEND_IMAGE:-aicompliance-frontend:local}
     build:
       context: ../aicompliance-frontend
       dockerfile: Dockerfile

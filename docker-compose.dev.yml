@@ -68,6 +68,9 @@ services:
       - "${BACKEND_HOST_PORT:-8081}:8080"
 
   frontend:
+    # FRONTEND_IMAGE lets CI deploy a specific already-built-and-pushed GHCR tag
+    # without rebuilding on the server. Left unset, `build:` below is used instead.
+    image: ${FRONTEND_IMAGE:-aicompliance-frontend:dev-local}
     build:
       context: ../aicompliance-frontend
       dockerfile: Dockerfile
