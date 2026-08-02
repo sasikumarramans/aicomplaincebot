@@ -85,6 +85,8 @@ jobs:
           script: |
             set -e
             cd ~/complaince-dev/backend
+            git fetch origin develop
+            git reset --hard origin/develop
             export BACKEND_IMAGE=ghcr.io/${{ github.repository }}:dev-${{ github.sha }}
             docker pull "$BACKEND_IMAGE"
             docker compose -f docker-compose.dev.yml --env-file .env.dev -p aicompliance-dev up -d --no-build backend
