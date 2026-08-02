@@ -35,7 +35,7 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required - generate 32+ random bytes}
-      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required, e.g. http://31.97.205.56:8080}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required, e.g. http://31.97.205.56:8090}
       # Defaulted (not :?required) for dev - email-dependent features (password
       # reset, signup approval emails) will silently no-op until a real SMTP_HOST
       # is set, per AuthService/SignupRequestService's documented email-failure
@@ -64,8 +64,9 @@ services:
       retries: 10
       start_period: 30s
     ports:
-      # Exposed directly (no Caddy in front for dev) - defaults to 8081, override via .env.dev.
-      - "${BACKEND_HOST_PORT:-8081}:8080"
+      # Exposed directly (no Caddy in front for dev) - defaults to 8091, override via .env.dev.
+      # (8080-8082 are already used by other projects on this shared server.)
+      - "${BACKEND_HOST_PORT:-8091}:8080"
 
   frontend:
     # FRONTEND_IMAGE lets CI deploy a specific already-built-and-pushed GHCR tag
@@ -79,8 +80,9 @@ services:
       backend:
         condition: service_healthy
     ports:
-      # Defaults to 8080 - browse http://<server-ip>:8080 for this environment.
-      - "${FRONTEND_HOST_PORT:-8080}:80"
+      # Defaults to 8090 - browse http://<server-ip>:8090 for this environment.
+      # (8080-8082 are already used by other projects on this shared server.)
+      - "${FRONTEND_HOST_PORT:-8090}:80"
 
 volumes:
   aicompliance-dev-postgres-data:
